@@ -14,31 +14,31 @@ int Str_Split(char *str, char c, char ***arr);
 char* Str_Conn(const char *s1, const char *s2);
 int searchltd(char * Ext,char * DomainExt,char * NoMatchPattern,char * WhoisQueryServer);
 int searchltd(char * Ext,char * DomainExt,char * NoMatchPattern,char * WhoisQueryServer){
-        char *line = NULL;
-        size_t len = 0;
-        ssize_t read;
-        char **arr = NULL;
-        FILE * fp = fopen("tld","r");
-        printf("456");
+	char *line = NULL;
+	size_t len = 0;
+	ssize_t read;
+	char **arr = NULL;
+	FILE * fp = fopen("tld","r");
+//	printf("456");
     if (fp==NULL) {
         printf("TLD database not found!\n");
         return 1;
     }
-        while ((read = getline(&line, &len, fp)) != -1) {
+	while ((read = getline(&line, &len, fp)) != -1) {
         Str_Split(line, '=', &arr);
         if (strcmp(arr[0],Ext)==0) {
-            strcpy(DomainExt,arr[0]);
-            strcpy(NoMatchPattern,arr[2]);
-            strcpy(WhoisQueryServer,arr[1]);
+	    strcpy(DomainExt,arr[0]);
+	    strcpy(NoMatchPattern,arr[2]);
+	    strcpy(WhoisQueryServer,arr[1]);
             break;
         }
     }
-        if (*DomainExt == '0') {
+	if (*DomainExt == '0') {
         printf("TLD not supported!\n");
-                return 1;
+		return 1;
     }
-        fclose(fp);
-        return 0;
+	fclose(fp);
+	return 0;
 }
 
 int main(int argc , char *argv[]) {
@@ -79,14 +79,21 @@ int main(int argc , char *argv[]) {
             }
             DomainPrefix[n++] = c;
         }
-                DomainPrefix[n]='\0';
-                Str_Split(DomainPrefix,'.',&arr);
-                strcpy(Ext,arr[1]);
-                strcpy(DomainPrefix,arr[0]);
-                r=searchltd(Ext,DomainExt,NoMatchPattern,WhoisQueryServer);
-                if(r==1){
-                        continue;
-                }
+		DomainPrefix[n]='\0';
+		int c1=0;
+		c1=Str_Split(DomainPrefix,'.',&arr);
+		strcpy(DomainPrefix,arr[0]);
+		for(int i=1;i<c1-1;i++){
+			Str_Conn(DomainPrefix,".");
+			Str_Conn(DomainPrefix,arr[i]);
+//			strcpy(DomainPrefix,arr[0]);
+		}
+		strcpy(Ext,arr[c1-1]);
+//		strcpy(DomainPrefix,arr[0]);
+		r=searchltd(Ext,DomainExt,NoMatchPattern,WhoisQueryServer);
+		if(r==1){
+			continue;
+		}
         strcpy(domain,Str_Conn(Str_Conn(DomainPrefix,"."),DomainExt));
         DomainScan(domain, NoMatchPattern, WhoisQueryServer, DomainExt);
     }
@@ -105,15 +112,15 @@ int DomainScan(char *domain , char * NoMatchPattern, char * WhoisQueryServer, ch
         sleep(1);
     }
     while(1);
-        if (strstr(response,NoMatchPattern)!=NULL) {
-                printf("%s Available for registration!\n", domain);
-                fpR=fopen(Str_Conn(DomainExt,"_results.dat"),"a");
-                fprintf(fpR,"%s\n",domain);
-        fclose(fpR);
-        }
-        else
-                printf("%s Not available.\n", domain);
-        return 0;
+	if (strstr(response,NoMatchPattern)!=NULL) {
+		printf("%s Available for registration!\n", domain);
+		fpR=fopen(Str_Conn(DomainExt,"_results.dat"),"a");
+		fprintf(fpR,"%s\n",domain);
+        	fclose(fpR);
+	}
+	else
+		printf("%s Not available.\n", domain);
+	return 0;
 }
 
 
@@ -193,16 +200,16 @@ int Str_Split(char *str, char c, char ***arr) {
     p = str;
     while (*p != '\0') {
         if (*p == c) {
-            (*arr)[i] = (char*) malloc( sizeof(char) * token_len );
-            if ((*arr)[i] == NULL){
+	    (*arr)[i] = (char*) malloc( sizeof(char) * token_len );
+	    if ((*arr)[i] == NULL){
         printf("Unable to access system memory.");
         exit(9);
         }
-            token_len = 0;
-            i++;
-        }
-        p++;
-        token_len++;
+	    token_len = 0;
+	    i++;
+	}
+	p++;
+	token_len++;
     }
     (*arr)[i] = (char*) malloc( sizeof(char) * token_len );
     if ((*arr)[i] == NULL) {
@@ -214,15 +221,15 @@ int Str_Split(char *str, char c, char ***arr) {
     t = ((*arr)[i]);
     while (*p != '\0') {
         if (*p != c && *p != '\0') {
-            *t = *p;
+	    *t = *p;
             t++;
-        }
-        else {
-            *t = '\0';
-            i++;
-            t = ((*arr)[i]);
-        }
-        p++;
+	}
+	else {
+	    *t = '\0';
+	    i++;
+	    t = ((*arr)[i]);
+	}
+	p++;
     }
     return count;
 }
