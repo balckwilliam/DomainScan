@@ -12,49 +12,59 @@ int hostname_to_ip(char * , char *);
 int whois_query(char * , char * , char **);
 int Str_Split(char *str, char c, char ***arr);
 char* Str_Conn(const char *s1, const char *s2);
-
-int main(int argc , char *argv[]) {
-    FILE * fp = fopen("tld","r");
+int searchltd(char * Ext,char * DomainExt,char * NoMatchPattern,char * WhoisQueryServer);
+int searchltd(char * Ext,char * DomainExt,char * NoMatchPattern,char * WhoisQueryServer){
+        char *line = NULL;
+        size_t len = 0;
+        ssize_t read;
+        char **arr = NULL;
+        FILE * fp = fopen("tld","r");
+        printf("456");
     if (fp==NULL) {
         printf("TLD database not found!\n");
-        exit(1);
+        return 1;
     }
-    char *line = NULL; char Ext[10];
-    size_t len = 0; ssize_t read;
-    char **arr = NULL;
-    char DomainExt[10]={'0'}; char NoMatchPattern[20]; char WhoisQueryServer[40];
-    printf("\n\nThank for using DomainScan. \n\nPlease note that this bot does not guarante the availability.\n\n");
-    printf("Please specify TLD: ");
-    scanf("%s", Ext);
-    while ((read = getline(&line, &len, fp)) != -1) {
+        while ((read = getline(&line, &len, fp)) != -1) {
         Str_Split(line, '=', &arr);
         if (strcmp(arr[0],Ext)==0) {
-	    strcpy(DomainExt,arr[0]); strcpy(NoMatchPattern,arr[2]); strcpy(WhoisQueryServer,arr[1]);
+            strcpy(DomainExt,arr[0]);
+            strcpy(NoMatchPattern,arr[2]);
+            strcpy(WhoisQueryServer,arr[1]);
             break;
         }
     }
-    if (*DomainExt == '0') {
+        if (*DomainExt == '0') {
         printf("TLD not supported!\n");
-        exit(2);
+                return 1;
     }
-    fclose(fp);
+        fclose(fp);
+        return 0;
+}
+
+int main(int argc , char *argv[]) {
+    int r;
+    char *line = NULL;
+    char Ext[10];
+    size_t len = 0;
+    ssize_t read;
+    char **arr = NULL;
+    char DomainExt[10]={'0'};
+    char NoMatchPattern[20];
+    char WhoisQueryServer[40];
+    printf("\n\nThank for using DomainScan. \n\nPlease note that this bot does not guarante the availability.\n\n");
     char DictFile[256];
-    printf("Please specify dicitionary file: ");
-    scanf("%s",DictFile);
+//    printf("Please specify dicitionary file: ");
+//    scanf("%s",DictFile);
+    strcpy(DictFile,argv[1]);
     FILE * fp_Dict = fopen(DictFile,"r");
     if (fp_Dict==NULL) {
         printf("dicitionary file not found!\n");
         exit(3);
     }
-    char c; size_t n=0;
+    char c;
+    size_t n=0;
     char DomainPrefix[70] , domain[100], *data = NULL;
-    FILE * fp_Result = fopen(Str_Conn(DomainExt,"_results.dat"),"w");
-    if (fp_Result==NULL) {
-        printf("Failed to write results to file!\n");
-        exit(4);
-    }
-    fprintf(fp_Result,"\nThank for using DomainScan!\n");
-    fclose(fp_Result);
+    FILE * fp_Result;
     while (1) {
         n=0;
         *DomainPrefix='\0';
@@ -69,7 +79,14 @@ int main(int argc , char *argv[]) {
             }
             DomainPrefix[n++] = c;
         }
-        DomainPrefix[n]='\0';
+                DomainPrefix[n]='\0';
+                Str_Split(DomainPrefix,'.',&arr);
+                strcpy(Ext,arr[1]);
+                strcpy(DomainPrefix,arr[0]);
+                r=searchltd(Ext,DomainExt,NoMatchPattern,WhoisQueryServer);
+                if(r==1){
+                        continue;
+                }
         strcpy(domain,Str_Conn(Str_Conn(DomainPrefix,"."),DomainExt));
         DomainScan(domain, NoMatchPattern, WhoisQueryServer, DomainExt);
     }
@@ -88,15 +105,15 @@ int DomainScan(char *domain , char * NoMatchPattern, char * WhoisQueryServer, ch
         sleep(1);
     }
     while(1);
-	if (strstr(response,NoMatchPattern)!=NULL) {
-		printf("%s Available for registration!\n", domain);
-		fpR=fopen(Str_Conn(DomainExt,"_results.dat"),"a");
-		fprintf(fpR,"%s\n",domain);
+        if (strstr(response,NoMatchPattern)!=NULL) {
+                printf("%s Available for registration!\n", domain);
+                fpR=fopen(Str_Conn(DomainExt,"_results.dat"),"a");
+                fprintf(fpR,"%s\n",domain);
         fclose(fpR);
-	}
-	else
-		printf("%s Not available.\n", domain);
-	return 0;
+        }
+        else
+                printf("%s Not available.\n", domain);
+        return 0;
 }
 
 
@@ -176,16 +193,16 @@ int Str_Split(char *str, char c, char ***arr) {
     p = str;
     while (*p != '\0') {
         if (*p == c) {
-	    (*arr)[i] = (char*) malloc( sizeof(char) * token_len );
-	    if ((*arr)[i] == NULL){
+            (*arr)[i] = (char*) malloc( sizeof(char) * token_len );
+            if ((*arr)[i] == NULL){
         printf("Unable to access system memory.");
         exit(9);
         }
-	    token_len = 0;
-	    i++;
-	}
-	p++;
-	token_len++;
+            token_len = 0;
+            i++;
+        }
+        p++;
+        token_len++;
     }
     (*arr)[i] = (char*) malloc( sizeof(char) * token_len );
     if ((*arr)[i] == NULL) {
@@ -197,15 +214,15 @@ int Str_Split(char *str, char c, char ***arr) {
     t = ((*arr)[i]);
     while (*p != '\0') {
         if (*p != c && *p != '\0') {
-	    *t = *p;
+            *t = *p;
             t++;
-	}
-	else {
-	    *t = '\0';
-	    i++;
-	    t = ((*arr)[i]);
-	}
-	p++;
+        }
+        else {
+            *t = '\0';
+            i++;
+            t = ((*arr)[i]);
+        }
+        p++;
     }
     return count;
 }
