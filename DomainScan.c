@@ -95,7 +95,7 @@ int main(int argc , char *argv[]) {
 			strcpy(DomainPrefix,Str_Conn(DomainPrefix,arr[i]));
 //			strcpy(DomainPrefix,arr[0]);
 		}
-		printf("ceshi:%s\n",DomainPrefix);
+//		printf("ceshi:%s\n",DomainPrefix);
 		strcpy(Ext,arr[c1-1]);
 //		Ext[strlen(Ext)]='\0';
 //		Str_Conn(Ext,"\0");
