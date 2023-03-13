@@ -91,10 +91,11 @@ int main(int argc , char *argv[]) {
 //		printf("\n\nsplit hou %s,%s,%d,%d,%s,%d\n",arr[0],arr[1],strlen(arr[0]),strlen(arr[1]),DomainPrefix,strlen(DomainPrefix));
 		strcpy(DomainPrefix,arr[0]);
 		for(int i=1;i<c1-1;i++){
-			Str_Conn(DomainPrefix,".");
-			Str_Conn(DomainPrefix,arr[i]);
+			strcpy(DomainPrefix,Str_Conn(DomainPrefix,"."));
+			strcpy(DomainPrefix,Str_Conn(DomainPrefix,arr[i]));
 //			strcpy(DomainPrefix,arr[0]);
 		}
+		printf("ceshi:%s\n",DomainPrefix);
 		strcpy(Ext,arr[c1-1]);
 //		Ext[strlen(Ext)]='\0';
 //		Str_Conn(Ext,"\0");
